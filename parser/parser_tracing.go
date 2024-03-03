@@ -21,11 +21,11 @@ func decIdentLevel() { tracingLevel = tracingLevel - 1 }
 
 func trace(msg string) string {
 	incIdentLevel()
-	tracePrint("BEGIN" + msg)
+	tracePrint("BEGIN" + " " + msg)
 	return msg
 }
 
 func untrace(msg string) {
-	tracePrint("END" + msg)
+	tracePrint("END" + " " + msg)
 	decIdentLevel()
 }
