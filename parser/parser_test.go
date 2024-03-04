@@ -389,7 +389,7 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 		},
 		{
 			"add(a + b + c * d / f + g)",
-			"add((((a + b) + ((c * d) / f)) + g))",
+			"add((((a+b)+((c*d)/f))+g))",
 		},
 	}
 
@@ -474,7 +474,7 @@ func TestBooleanExpression(t *testing.T) {
 	}
 	literal, ok := stmt.Expression.(*ast.Boolean)
 	if !ok {
-		t.Fatalf("exp not *ast.IntegerLiteeral. got=%T", stmt.Expression)
+		t.Fatalf("exp not *ast.Boolean. got=%T", stmt.Expression)
 	}
 	if literal.Value != true {
 		t.Errorf("ident.Value not %d. got=%t", 5, literal.Value)
@@ -498,4 +498,36 @@ func testingBooleanLiteral(t *testing.T, exp ast.Expression, value bool) bool {
 		t.Errorf("bo.TokenLiteral not =%t.got=%s", value, bo.TokenLiteral())
 	}
 	return true
+}
+
+func TestIfExpression(t *testing.T) {
+	input := `if (x < y) { x } else { y }`
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParserProgram()
+	checkParserErrors(t, p)
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast ExpressionStatement. got=%T", program.Statements[0])
+	}
+	exp, ok := stmt.Expression.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("exp not *ast.IfExpression. got=%T", stmt.Expression)
+	}
+	if !testingInfixExpression(t, exp.Condition, "x", "<", "y") {
+		return
+	}
+	if len(exp.Consequence.Statements) != 1 {
+		t.Fatalf("consequence has not 1 statement. got=%d\n", len(program.Statements))
+	}
+	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("exp.Consequence.Statements[0] is not *ast.ExpressionStatement.got=%T", exp.Consequence.Statements[0])
+	}
+	if !testingIdentifier(t, consequence.Expression, "x") {
+		return
+	}
+	if exp.Alternative == nil {
+		t.Errorf("exp.Alternative statement was not null.got=%+v", exp.Alternative)
+	}
 }
