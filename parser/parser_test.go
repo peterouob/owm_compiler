@@ -454,3 +454,30 @@ func testingInfixExpression(t *testing.T, exp ast.Expression, left interface{}, 
 	}
 	return true
 }
+
+func TestBooleanExpression(t *testing.T) {
+	input := "true;"
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParserProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statement. got=%d", len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast ExpressionStatement. got=%T", program.Statements[0])
+	}
+	literal, ok := stmt.Expression.(*ast.Boolean)
+	if !ok {
+		t.Fatalf("exp not *ast.IntegerLiteeral. got=%T", stmt.Expression)
+	}
+	if literal.Value != true {
+		t.Errorf("ident.Value not %d. got=%T", 5, literal.Value)
+	}
+	if literal.TokenLiteral() != "true" {
+		t.Errorf("ident.TokenLiteral not %s.got=%s", "5", literal.TokenLiteral())
+	}
+}
