@@ -431,6 +431,8 @@ func testLiteralExpression(t *testing.T, exp ast.Expression, expect interface{})
 		return testingIntegerLiteral(t, exp, v)
 	case string:
 		return testingIdentifier(t, exp, v)
+	case bool:
+		return testingBooleanLiteral(t, exp, v)
 	}
 	t.Errorf("type of expect not handler.got=%T", exp)
 	return false
@@ -475,9 +477,25 @@ func TestBooleanExpression(t *testing.T) {
 		t.Fatalf("exp not *ast.IntegerLiteeral. got=%T", stmt.Expression)
 	}
 	if literal.Value != true {
-		t.Errorf("ident.Value not %d. got=%T", 5, literal.Value)
+		t.Errorf("ident.Value not %d. got=%t", 5, literal.Value)
 	}
 	if literal.TokenLiteral() != "true" {
 		t.Errorf("ident.TokenLiteral not %s.got=%s", "5", literal.TokenLiteral())
 	}
+}
+
+func testingBooleanLiteral(t *testing.T, exp ast.Expression, value bool) bool {
+	bo, ok := exp.(*ast.Boolean)
+	if !ok {
+		t.Errorf("exp is not a type of ast.Boolean")
+		return false
+	}
+	if bo.Value != value {
+		t.Errorf("bo.Vlaue not =%t.got=%t", value, bo.Value)
+		return false
+	}
+	if bo.TokenLiteral() != fmt.Sprintf("%t", value) {
+		t.Errorf("bo.TokenLiteral not =%t.got=%s", value, bo.TokenLiteral())
+	}
+	return true
 }
